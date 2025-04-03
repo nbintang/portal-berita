@@ -37,7 +37,7 @@ declare module "next-auth" {
 export const authConfig = {
   session: {
     strategy: "jwt",
-    maxAge:  24 * 60 * 60, // 1 day
+    maxAge: 24 * 60 * 60, // 1 day
   },
   providers: [
     EmailProvider({
@@ -48,12 +48,14 @@ export const authConfig = {
           user: process.env.EMAIL_SERVER_USER,
           pass: process.env.EMAIL_SERVER_PASSWORD,
         },
+        
       },
-      async sendVerificationRequest({ identifier: email, url,token }) {
-return 
+      secret: env.AUTH_SECRET,
+      async sendVerificationRequest({ identifier: email, url, token, expires }) {
+        return;
       },
       async generateVerificationToken() {
-        return "test"
+        return "test";
       },
       from: process.env.EMAIL_FROM,
     }),
@@ -68,16 +70,16 @@ return
      * @see https://next-auth.js.org/providers/github
      */
   ],
- secret: env.AUTH_SECRET,
+  secret: env.AUTH_SECRET,
   adapter: {
-    ... PrismaAdapter(db),
-   async createVerificationToken(verificationToken)  {
-    return {
-      identifier: verificationToken.identifier,
-      token: verificationToken.token,
-      expires: verificationToken.expires,
-    }
-  }
+    ...PrismaAdapter(db),
+    async createVerificationToken(verificationToken) {
+      return {
+        identifier: verificationToken.identifier,
+        token: verificationToken.token,
+        expires: verificationToken.expires,
+      };
+    },
   },
   callbacks: {
     session: ({ session, user }) => ({
