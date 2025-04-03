@@ -1,8 +1,10 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
-
+import EmailProvider from "next-auth/providers/email";
 import { db } from "@/server/db";
+import type { User } from "@prisma/client";
+import { env } from "@/env";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -14,8 +16,10 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      // ...other properties
-      // role: UserRole;
+      name: string;
+      image: string;
+      email: string;
+      role: User["role"];
     } & DefaultSession["user"];
   }
 
@@ -31,7 +35,28 @@ declare module "next-auth" {
  * @see https://next-auth.js.org/configuration/options
  */
 export const authConfig = {
+  session: {
+    strategy: "jwt",
+    maxAge:  24 * 60 * 60, // 1 day
+  },
   providers: [
+    EmailProvider({
+      server: {
+        host: process.env.EMAIL_SERVER_HOST,
+        port: process.env.EMAIL_SERVER_PORT,
+        auth: {
+          user: process.env.EMAIL_SERVER_USER,
+          pass: process.env.EMAIL_SERVER_PASSWORD,
+        },
+      },
+      async sendVerificationRequest({ identifier: email, url,token }) {
+return 
+      },
+      async generateVerificationToken() {
+        return "test"
+      },
+      from: process.env.EMAIL_FROM,
+    }),
     DiscordProvider,
     /**
      * ...add more providers here.
@@ -43,7 +68,17 @@ export const authConfig = {
      * @see https://next-auth.js.org/providers/github
      */
   ],
-  adapter: PrismaAdapter(db),
+ secret: env.AUTH_SECRET,
+  adapter: {
+    ... PrismaAdapter(db),
+   async createVerificationToken(verificationToken)  {
+    return {
+      identifier: verificationToken.identifier,
+      token: verificationToken.token,
+      expires: verificationToken.expires,
+    }
+  }
+  },
   callbacks: {
     session: ({ session, user }) => ({
       ...session,

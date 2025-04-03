@@ -17,7 +17,7 @@ datasource db {
 model User {
     id             String    @id @default(uuid())
     name           String
-    image_url    String?
+    image_url      String?
     email          String    @unique
     password       String
     email_verified DateTime?
@@ -81,15 +81,15 @@ model Comment {
     content    String
     user_id    String
     article_id String
-    parent_id  String?  // Menambahkan referensi ke parent comment (nullable)
+    parent_id  String? // Menambahkan referensi ke parent comment (nullable)
     created_at DateTime @default(now())
     updated_at DateTime @updatedAt
 
-    user    User      @relation(fields: [user_id], references: [id])
-    article Article   @relation(fields: [article_id], references: [id])
+    user    User    @relation(fields: [user_id], references: [id])
+    article Article @relation(fields: [article_id], references: [id])
 
-    parent   Comment? @relation("CommentReplies", fields: [parent_id], references: [id]) // Relasi ke komentar utama
-    replies  Comment[] @relation("CommentReplies") // Relasi ke balasan komentar
+    parent  Comment?  @relation("CommentReplies", fields: [parent_id], references: [id]) // Relasi ke komentar utama
+    replies Comment[] @relation("CommentReplies") // Relasi ke balasan komentar
 }
 
 model Tag {
