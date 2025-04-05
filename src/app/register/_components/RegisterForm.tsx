@@ -114,7 +114,7 @@ export default function RegisterForm() {
               <Dropzone {...dropzone}>
                 <DropZoneArea className="flex items-center justify-start">
                   <DropzoneTrigger className="flex items-center gap-8 bg-transparent text-sm">
-                    <Avatar className={cn(isPending && "animate-pulse")}>
+                    <Avatar className={cn(isPending && "animate-pulse", "size-20")}>
                       <AvatarImage className="object-cover" src={avatarSrc} />
                       <AvatarFallback>AV</AvatarFallback>
                     </Avatar>

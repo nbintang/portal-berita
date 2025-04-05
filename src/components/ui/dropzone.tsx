@@ -10,8 +10,8 @@ import {
   useState,
 } from "react";
 import {
- type Accept,
- type FileRejection,
+  type Accept,
+  type FileRejection,
   useDropzone as rootUseDropzone,
 } from "react-dropzone";
 import { Button, ButtonProps } from "./button";
@@ -323,6 +323,7 @@ const useDropzone = <TUploadRes, TUploadError = string>(
     accept: validation?.accept,
     minSize: validation?.minSize,
     maxSize: validation?.maxSize,
+
     onDropAccepted: async (newFiles) => {
       setRootError(undefined);
 
@@ -388,7 +389,9 @@ const useDropzone = <TUploadRes, TUploadError = string>(
 const DropZoneContext = createContext<UseDropzoneReturn<any, any>>({
   getRootProps: () => ({}) as never,
   getInputProps: () => ({}) as never,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   onRemoveFile: async () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   onRetry: async () => {},
   canRetry: () => false,
   fileStatuses: [],
@@ -436,11 +439,10 @@ const DropZoneArea = forwardRef<HTMLDivElement, DropZoneAreaProps>(
 
     return (
       // A11y behavior is handled through Trigger. All of these are only relevant to drag and drop which means this should be fine?
-      // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+    
       <div
         ref={(instance) => {
           // TODO: test if this actually works?
-          
           ref.current = instance;
           if (typeof forwardedRef === "function") {
             forwardedRef(instance);
@@ -456,7 +458,7 @@ const DropZoneArea = forwardRef<HTMLDivElement, DropZoneAreaProps>(
         {...props}
         aria-label="dropzone"
         className={cn(
-          "flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          "border-input bg-background ring-offset-background focus-visible:ring-ring flex items-center justify-center rounded-md border px-4 py-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
           context.isDragActive && "animate-pulse bg-black/5",
           context.isInvalid && "border-destructive",
           className,
@@ -487,7 +489,7 @@ const DropzoneDescription = forwardRef<
       ref={ref}
       id={context.rootDescriptionId}
       {...rest}
-      className={cn("pb-1 text-sm text-muted-foreground", className)}
+      className={cn("text-muted-foreground pb-1 text-sm", className)}
     />
   );
 });
@@ -505,7 +507,9 @@ interface DropzoneFileListContext<TUploadRes, TUploadError> {
 const DropzoneFileListContext = createContext<
   DropzoneFileListContext<unknown, unknown>
 >({
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   onRemoveFile: async () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   onRetry: async () => {},
   fileStatus: {} as FileStatus<unknown, unknown>,
   canRetry: false,
@@ -582,7 +586,7 @@ const DropzoneFileListItem = forwardRef<
         aria-label="dropzone-file-list-item"
         aria-describedby={isInvalid ? messageId : undefined}
         className={cn(
-          "flex flex-col justify-center gap-2 rounded-md bg-muted/40 px-4 py-2",
+          "bg-muted/40 flex flex-col justify-center gap-2 rounded-md px-4 py-2",
           className,
         )}
       >
@@ -618,7 +622,7 @@ const DropzoneFileMessage = forwardRef<
       id={context.messageId}
       {...rest}
       className={cn(
-        "h-5 text-[0.8rem] font-medium text-destructive",
+        "text-destructive h-5 text-[0.8rem] font-medium",
         rest.className,
       )}
     >
@@ -645,7 +649,7 @@ const DropzoneMessage = forwardRef<HTMLParagraphElement, DropzoneMessageProps>(
         id={context.rootMessageId}
         {...rest}
         className={cn(
-          "h-5 text-[0.8rem] font-medium text-destructive",
+          "text-destructive h-5 text-[0.8rem] font-medium",
           rest.className,
         )}
       >
@@ -748,7 +752,7 @@ const DropzoneTrigger = forwardRef<HTMLLabelElement, DropzoneTriggerProps>(
         ref={ref}
         {...props}
         className={cn(
-          "cursor-pointer rounded-sm bg-secondary px-4 py-2 font-medium ring-offset-background transition-colors focus-within:outline-none hover:bg-secondary/80 has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-ring has-[input:focus-visible]:ring-offset-2",
+          "bg-secondary ring-offset-background hover:bg-secondary/80 has-[input:focus-visible]:ring-ring cursor-pointer rounded-sm px-4 py-2 font-medium transition-colors focus-within:outline-none has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-offset-2",
           className,
         )}
       >
@@ -797,14 +801,14 @@ const InfiniteProgress = forwardRef<HTMLDivElement, InfiniteProgressProps>(
         aria-valuetext={valueTextMap[props.status]}
         {...props}
         className={cn(
-          "relative h-2 w-full overflow-hidden rounded-full bg-muted",
+          "bg-muted relative h-2 w-full overflow-hidden rounded-full",
           className,
         )}
       >
         <div
           //   TODO: add proper done transition
           className={cn(
-            "h-full w-full rounded-full bg-primary",
+            "bg-primary h-full w-full rounded-full",
             done ? "translate-x-0" : "animate-infinite-progress",
             error && "bg-destructive",
           )}
