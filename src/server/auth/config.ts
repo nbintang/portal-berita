@@ -1,10 +1,12 @@
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
 import DiscordProvider from "next-auth/providers/discord";
 import EmailProvider from "next-auth/providers/email";
 import { db } from "@/server/db";
-import type { User } from "@prisma/client";
+import { Prisma, type User } from "@prisma/client";
+import { PrismaAdapter } from "@auth/prisma-adapter";
 import { env } from "@/env";
+import { sendVerificationRequest, generateVerificationToken } from "@/lib/mail";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -35,31 +37,21 @@ declare module "next-auth" {
  * @see https://next-auth.js.org/configuration/options
  */
 export const authConfig = {
-  session: {
-    strategy: "jwt",
-    maxAge: 24 * 60 * 60, // 1 day
+  pages: {
+    newUser: "/register",
   },
   providers: [
     EmailProvider({
       server: {
-        host: process.env.EMAIL_SERVER_HOST,
-        port: process.env.EMAIL_SERVER_PORT,
+        host: env.EMAIL_SERVER_HOST,
+        port: env.EMAIL_SERVER_PORT,
         auth: {
-          user: process.env.EMAIL_SERVER_USER,
-          pass: process.env.EMAIL_SERVER_PASSWORD,
+          user: env.EMAIL_SERVER_USER,
+          pass: env.EMAIL_SERVER_PASSWORD,
         },
-        
       },
-      secret: env.AUTH_SECRET,
-      async sendVerificationRequest({ identifier: email, url, token, expires }) {
-        return;
-      },
-      async generateVerificationToken() {
-        return "test";
-      },
-      from: process.env.EMAIL_FROM,
+      from: env.EMAIL_SERVER_FROM,
     }),
-    DiscordProvider,
     /**
      * ...add more providers here.
      *
@@ -70,24 +62,24 @@ export const authConfig = {
      * @see https://next-auth.js.org/providers/github
      */
   ],
-  secret: env.AUTH_SECRET,
-  adapter: {
-    ...PrismaAdapter(db),
-    async createVerificationToken(verificationToken) {
-      return {
-        identifier: verificationToken.identifier,
-        token: verificationToken.token,
-        expires: verificationToken.expires,
-      };
-    },
-  },
+  secret: env.NEXTAUTH_SECRET,
+  adapter: PrismaAdapter(db),
   callbacks: {
-    session: ({ session, user }) => ({
+    signIn: async ({ account, user }) => {
+      if (account?.provider === "email" && !user.name) return true;
+      return true;
+    },
+    session: async ({ session, user }) => ({
       ...session,
       user: {
         ...session.user,
+        role: "READER",
         id: user.id,
       },
     }),
+    redirect: async ({ url, baseUrl }) => {
+      if (url.includes("/api/auth/callback/email"))  return `${baseUrl}/register`;
+      return url.startsWith(baseUrl) ? url : baseUrl;
+    },
   },
 } satisfies NextAuthConfig;
