@@ -25,20 +25,28 @@ import {
   useDropzone,
 } from "@/components/ui/dropzone";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Checkbox } from "@/components/ui/checkbox";
 
-const formSchema = z.object({
-  name: z.string().min(1),
+const registerSchema = z.object({
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
   image: z.string().optional(), // URL hasil upload
+  acceptedTOS: z.boolean().refine((val) => val === true, {
+    message: "You must accept the Terms of Service",
+  }),
 });
 
 export default function RegisterForm() {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof registerSchema>>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
-      name: "",
+      firstName: "",
+      lastName: "",
       image: undefined,
+      acceptedTOS: false,
     },
   });
+
 
   const dropzone = useDropzone({
     onDropFile: async (file: File) => {
@@ -65,12 +73,25 @@ export default function RegisterForm() {
   const avatarSrc = dropzone.fileStatuses[0]?.result;
   const isPending = dropzone.fileStatuses[0]?.status === "pending";
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.infer<typeof registerSchema>) {
     try {
       console.log("Submitted:", values);
+      const unFormattedFullName = `${values.firstName} ${values.lastName}`;
+      // cut the space  just 1 space
+      const fullName = unFormattedFullName.replace(/\s+/g, " ").trim();
       toast(
         <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
+          <code className="text-white">
+            {JSON.stringify(
+              {
+                fullName,
+                image: values.image,
+                acceptedTOS: values.acceptedTOS,
+              },
+              null,
+              2,
+            )}
+          </code>
         </pre>,
       );
     } catch (error) {
@@ -88,13 +109,13 @@ export default function RegisterForm() {
         {/* Username */}
         <FormField
           control={form.control}
-          name="name"
+          name="firstName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>First Name</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Enter your username"
+                  placeholder="Enter your first name"
                   type="text"
                   {...field}
                 />
@@ -103,7 +124,23 @@ export default function RegisterForm() {
             </FormItem>
           )}
         />
-
+        <FormField
+          control={form.control}
+          name="lastName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Last Name</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Enter your last name"
+                  type="text"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         {/* Image Upload */}
         <FormField
           control={form.control}
@@ -114,7 +151,9 @@ export default function RegisterForm() {
               <Dropzone {...dropzone}>
                 <DropZoneArea className="flex items-center justify-start">
                   <DropzoneTrigger className="flex items-center gap-8 bg-transparent text-sm">
-                    <Avatar className={cn(isPending && "animate-pulse", "size-20")}>
+                    <Avatar
+                      className={cn(isPending && "animate-pulse", "size-20")}
+                    >
                       <AvatarImage className="object-cover" src={avatarSrc} />
                       <AvatarFallback>AV</AvatarFallback>
                     </Avatar>
@@ -134,9 +173,30 @@ export default function RegisterForm() {
                   </DropzoneMessage>
                 </div>
               )}
-
               <FormDescription>Select an image to upload.</FormDescription>
               <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="acceptedTOS"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-y-0 space-x-3 rounded-md border p-4">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>I Accept Terms of Services</FormLabel>
+                <FormDescription>
+                  You can manage your mobile notifications in the mobile
+                  settings page.
+                </FormDescription>
+                <FormMessage />
+              </div>
             </FormItem>
           )}
         />

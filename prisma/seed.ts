@@ -8,8 +8,9 @@ async function main() {
     data: [
       {
         id: "user-1",
-        name: "John Doe",
+        fullName: "John Doe",
         email: "john@example.com",
+        acceptedTOS: true,
         image:
           "https://www.shutterstock.com/shutterstock/photos/2423213779/display_1500/stock-photo-a-very-random-pose-of-asian-men-wearing-blue-t-shirts-on-a-gray-background-random-theme-2423213779.jpg",
         role: "ADMIN",
@@ -18,7 +19,8 @@ async function main() {
       },
       {
         id: "user-2",
-        name: "Jane Smith",
+        fullName: "Jane Smith",
+        acceptedTOS: true,
         image:
           "https://media-cdn.tripadvisor.com/media/photo-s/19/9c/93/21/random-pics.jpg",
         email: "jane@example.com",
@@ -28,7 +30,8 @@ async function main() {
       },
       {
         id: "user-3",
-        name: "Alice Johnson",
+        fullName: "Alice Johnson",
+        acceptedTOS: true,
         email: "alice@example.com",
         image:
           "https://media.istockphoto.com/id/1618846975/photo/smile-black-woman-and-hand-pointing-in-studio-for-news-deal-or-coming-soon-announcement-on.jpg?s=612x612&w=0&k=20&c=LUvvJu4sGaIry5WLXmfQV7RStbGG5hEQNo8hEFxZSGY=",
@@ -38,8 +41,9 @@ async function main() {
       },
       {
         id: "user-4",
-        name: "Bob Brown",
+        fullName: "Bob Brown",
         email: "bob@example.com",
+        acceptedTOS: true,
         image: "https://live.staticflickr.com/4097/4782981316_9cc563b3a5_c.jpg",
         role: "READER",
         emailVerified: new Date(),

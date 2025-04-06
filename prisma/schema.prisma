@@ -14,7 +14,6 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-
 // Necessary for Next auth
 model Account {
     id                       String  @id @default(cuid())
@@ -48,11 +47,13 @@ enum Role {
     REPORTER
     ADMIN
 }
+
 model User {
     id            String    @id @default(cuid())
-    name          String?
+    fullName      String?   @db.VarChar(100)
     email         String?   @unique
     emailVerified DateTime?
+    acceptedTOS   Boolean   @default(false)
     image         String?
     role          Role      @default(READER)
     accounts      Account[]
@@ -61,7 +62,6 @@ model User {
     comments      Comment[]
     likes         Like[]
 }
-
 
 model VerificationToken {
     identifier String
@@ -74,7 +74,7 @@ model VerificationToken {
 model Category {
     id          String   @id @default(uuid())
     name        String   @unique
-    description String?
+    description String?  @db.VarChar(255)
     created_at  DateTime @default(now())
     updated_at  DateTime @updatedAt
 
@@ -85,7 +85,7 @@ model Article {
     id           String    @id @default(uuid())
     title        String
     slug         String    @unique
-    content      String
+    content      String    @db.MediumText
     image_url    String
     author_id    String
     category_id  String
@@ -103,7 +103,7 @@ model Article {
 
 model Comment {
     id         String   @id @default(uuid())
-    content    String
+    content    String   @db.VarChar(1200)
     user_id    String
     article_id String
     parent_id  String? // Menambahkan referensi ke parent comment (nullable)
@@ -119,7 +119,7 @@ model Comment {
 
 model Tag {
     id         String   @id @default(uuid())
-    name       String   @unique
+    name       String   @unique @db.VarChar(50)
     created_at DateTime @default(now())
     updated_at DateTime @updatedAt
 
